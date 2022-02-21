@@ -6,12 +6,16 @@ public class PlayerController : MonoBehaviour
 {
     public float gravity = 3.5f; //gravity force
     public float speed = 2f;    //normal player movement speed
+    [Range(0.1f, 1f)]
+    public float crouchSpeedMultiplier = 0.5f;
     public float jumpForce = 0.5f;  //jumping force
 
     private CharacterController controller;
     private Vector3 motion;
     private float currentSpeed = 0;
     private float velocity = 0;
+    private bool crouching = false;
+    private bool isGrounded = false;
 
 
     // Awake is called before the Start method
@@ -28,10 +32,10 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        isGrounded= controller.isGrounded;
         motion = Vector3.zero;
-        bool grounded = controller.isGrounded;
 
-        if (grounded == true)
+        if (isGrounded == true)
         {
             velocity = -gravity * Time.deltaTime;
         }
@@ -46,11 +50,30 @@ public class PlayerController : MonoBehaviour
     {
 
 
-        if (controller.isGrounded == true)
+        if (isGrounded == true)
         {
-            if (Input.GetKeyDown(KeyCode.Space) == true)
+            if(crouching == false)
             {
-                velocity = jumpForce;
+                if (Input.GetKeyDown(KeyCode.Space) == true)
+                {
+                    velocity = jumpForce;
+                }
+                else if (Input.GetKeyDown(KeyCode.C) == true)
+                {
+                    crouching = true;
+                    currentSpeed = speed * crouchSpeedMultiplier;
+                    controller.height = 1;
+                }
+            }
+            
+        }
+        if (crouching == true)
+        {
+            if (Input.GetKeyUp(KeyCode.C) == true)
+            {
+                crouching = false;
+                currentSpeed = speed * crouchSpeedMultiplier;
+                controller.height = 2;
             }
         }
         ApplyMovement();
